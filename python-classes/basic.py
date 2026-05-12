@@ -13,7 +13,6 @@ create 2 student objects
 call introduce() for both
 """
 
-from re import S
 
 
 class Student:
@@ -234,5 +233,297 @@ teacher1.show_teacher()
 
 
 '''
+Exercise 1: BookShelf
 
+Create a class called BookShelf.
+
+It should store a list of books.
+
+Add:
+
+__len__
+__getitem__
+__contains__
 '''
+
+
+class BookShelf:
+    def __init__(self,books):
+        self.books=books
+
+    def __len__(self):
+        return len(self.books)
+
+    def __getitem__(self,index):
+        return self.books[index]
+
+    def __contains__(self, item):
+        return item in self.books
+
+
+shelf = BookShelf(["Python Basics", "Django Intro", "OOP Mastery"])
+
+print(len(shelf))
+print(shelf[0])
+print("Django Intro" in shelf)
+print("Java Basics" in shelf)
+
+
+
+class Playlist:
+    def __init__(self,playlists):
+        self.playlists=playlists
+
+    def __len__(self):
+        return len(self.playlists)
+
+    def __getitem__(self, index):
+        return self.playlists[index]
+
+    def __contains__(self, item):
+        return item in self.playlists
+
+
+
+
+
+
+
+
+
+playlist = Playlist(["Song A", "Song B", "Song C"])
+
+print(len(playlist))
+print(playlist[2])
+print("Song B" in playlist)
+
+
+
+
+
+
+
+class StudentGroup:
+    def __init__(self,students):
+        self.students=students
+
+    def __len__(self):
+        return len(self.students)
+
+    def __getitem__(self,index):
+        return self.students[index]
+
+    def __contains__(self, item):
+        return item in self.students
+
+group = StudentGroup(["Ali", "Sara", "John", "Zara"])
+
+print(len(group))
+print(group[1])
+print(group[0:2])
+print("John" in group)
+
+
+
+
+class BaseView:
+    def dispatch(self):
+        self.setup()
+        self.handle()
+        self.finish()
+
+    def setup(self):
+        print("Preparing request")
+
+    def handle(self):
+        raise NotImplementedError(
+            "Child class must define handle()"
+        )
+    def finish(self):
+        print("Sending response")
+
+
+class HomeView(BaseView):
+    def handle(self):
+        print("Showing homepage")
+view = HomeView()
+view.dispatch()
+view.handle()
+
+
+
+
+class BaseForm:
+    def process(self):
+        self.validate()
+        self.save()
+
+    def validate(self):
+        raise NotImplementedError('Must be implemented by the child class validate()')
+    def save(self):
+          raise NotImplementedError('Must be implemented by the child class save()')
+
+class UserForm(BaseForm):
+    def validate(self):
+        print("Validating user data")
+
+    def save(self):
+        print("Saving user data")
+
+form = UserForm()
+form.process()
+
+
+
+class BaseReport:
+    def generate(self):
+        print("Generating base report")
+
+
+class SalesReport(BaseReport):
+    def generate(self):
+        print("Preparing sales data")
+        super().generate()
+        print("Sales report ready")
+
+report = SalesReport()
+report.generate()
+
+
+class ArticleView:
+    model="Article"
+    template_name = "article_detail.html"
+
+    def __init__(self,article_id):
+        self.article_id=article_id
+
+    def show(self):
+        print(
+            f'Model: {self.model}'
+        )
+        print(
+            f'Template: {self.template_name}'
+        )
+        print(
+            f'Article ID: {self.article_id}'
+        )
+
+
+view = ArticleView(101)
+view.show()
+
+
+
+class PublishedPostView:
+    def get_queryset(self):
+        posts = [
+            {"title": "Python Classes", "published": True},
+            {"title": "Django Draft", "published": False},
+            {"title": "Django CBV", "published": True},
+        ]
+        return [post for post in posts if post['published']]
+    def show(self):
+        posts = self.get_queryset()
+        for post in posts:
+            print(post['title'])
+
+c= PublishedPostView()
+c.show()
+
+class CoursePageView:
+    def get_queryset(self):
+        return ["Python", "Django", "REST API"]
+
+
+    def get_context_data(self,**kwargs):
+        return {
+            "page_title":"Course",
+            "total_courses":len(self.get_queryset())
+        }
+    def show(self):
+        context = self.get_context_data()
+        return context
+
+
+context=CoursePageView()
+context=context.get_context_data()
+print(context["page_title"])
+print(context["total_courses"])
+
+
+class UserSerializer:
+    pass
+
+class BaseAPIView:
+    serializer_class=None
+    def get_serializer_class(self):
+        return self.serializer_class
+    def show_serializer(self):
+        serializer = self.get_serializer_class()
+        print(serializer.__name__)
+
+
+
+class UserListAPIView(BaseAPIView):
+    serializer_class=UserSerializer
+
+test = UserListAPIView()
+test.show_serializer()
+
+
+
+
+
+class ProductListSerializer:
+    pass
+
+class ProductDetailSerializer:
+    pass
+
+
+class ModelViewSet:
+    pass
+
+
+class ProductViewSet(ModelViewSet):
+    action = "list"
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ProductListSerializer
+        return ProductDetailSerializer
+
+
+
+view = ProductViewSet()
+
+print(view.get_serializer_class().__name__)
+
+view.action = "retrieve"
+
+print(view.get_serializer_class().__name__)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
