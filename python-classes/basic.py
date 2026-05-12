@@ -1,3 +1,4 @@
+
 """
 Problem 1
 Create a class called Student.
@@ -515,8 +516,23 @@ print(view.get_serializer_class().__name__)
 
 
 
+class IsAuthenticated:
+    def has_permission(self,user):
+        return user is not None
 
+class BaseAPIView:
+    permission_classes =[]
 
+    def get_permissions(self):
+        return [
+          permission()  for permission in self.permissions
+        ]
+
+    def check_permission(self,user):
+        for permission in self.get_permissions():
+            if not permission.has_permission(user):
+                return False
+            return True
 
 
 
