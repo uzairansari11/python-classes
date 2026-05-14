@@ -525,16 +525,529 @@ class BaseAPIView:
 
     def get_permissions(self):
         return [
-          permission()  for permission in self.permissions
+          permission()  for permission in self.permission_classes
         ]
 
     def check_permission(self,user):
         for permission in self.get_permissions():
             if not permission.has_permission(user):
                 return False
+        return True
+
+
+class OrderAPIView(BaseAPIView):
+    permission_classes = [IsAuthenticated]
+
+
+view = OrderAPIView()
+
+print(view.check_permission("Ali"))
+print(view.check_permission(None))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class IsAuthenticated:
+    def has_permission(self,user):
+        return user is not None
+class IsAdminUser:
+    def has_permission(self,user):
+        return user is not None and user.get("is_admin")==True
+
+class BaseAPIView:
+    permission_classes = []
+
+    def get_permission(self):
+        return [
+            permission()
+            for permission in self.permission_classes
+        ]
+
+    def check_permission(self,user):
+        permissions = self.get_permission()
+        for permission in permissions:
+            if not permission.has_permission(user):
+                return False
+        return True
+
+
+
+class AdminDashboardAPIView(BaseAPIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+view = AdminDashboardAPIView()
+
+print(view.check_permission({"name": "Ali", "is_admin": True}))
+print(view.check_permission({"name": "Sara", "is_admin": False}))
+print(view.check_permission(None))
+
+
+
+class TokenAuthentication:
+    def authenticate(self,token):
+        if token =="secret":
+            return  {"name": "Sara"}
+
+        return None
+
+
+class BaseAPIView:
+    authentication_classes = []
+    permission_classes = []
+
+    def get_authenticators (self):
+        return [
+            auth() for auth in self.authentication_classes
+        ]
+    def get_permissions(self):
+        return [
+            permission() for permission in self.permission_classes
+        ]
+
+    def authenticate_user(self,token):
+        authenticators = self.get_authenticators()
+        for authenticator in authenticators:
+            user= authenticator.authenticate(token)
+            if user is not None:
+                return user
+        return None
+
+    def check_permission(self,user):
+        permissions = self.get_permissions()
+        for permission in permissions:
+            if not permission.has_permission(user):
+                return False
             return True
 
+class ProfileAPIView(BaseAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
+
+
+print("----------------------")
+
+view = ProfileAPIView()
+
+user = view.authenticate_user("secret")
+print(user)
+print(view.check_permission(user))
+
+user = view.authenticate_user("wrong")
+print(user)
+print(view.check_permission(user))
+
+
+class FakeSerializer:
+    def save(self, **kwargs):
+        print("Saving product")
+        print(kwargs)
+
+class BaseCreateAPIView:
+    def create(self,serializer):
+        print("Validating data")
+        self.perform_create(serializer)
+        print("Sending success response")
+
+    def perform_create(self,serializer):
+        serializer.save()
+
+
+class ProductCreateAPIView(BaseCreateAPIView):
+    def __init__(self,user):
+        self.user=user
+
+    def perform_create(self,serializer):
+        serializer.save(created_by = self.user)
+
+
+
+
+serializer = FakeSerializer()
+view = ProductCreateAPIView("Sara")
+view.create(serializer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class FakeSerializer:
+    def save(self, **kwargs):
+        print("Updating product")
+        print(kwargs)
+
+class BaseUpdateAPIView:
+    def update(self,serializer):
+        print("Validating update data")
+
+        self.perform_update(serializer)
+
+        print("Sending update response")
+
+    def perform_update(self,serializer):
+        serializer.save()
+
+
+
+class ProductUpdateAPIView(BaseUpdateAPIView):
+
+    def __init__(self,user):
+        self.user = user
+
+
+    def perform_update(self, serializer):
+        return serializer.save(updated_by=self.user)
+
+
+
+
+
+serializer = FakeSerializer()
+view = ProductUpdateAPIView("Ali")
+view.update(serializer)
+
+
+
+
+class FakeSerializer:
+
+    def __init__(self,context = None):
+        self.context = context or {}
+
+
+    def show_context(self):
+        print(self.context)
+
+
+class BaseAPIView:
+    def get_serializer_context(self):
+        return {
+            "request":"fake-request"
+        }
+    def get_serializer(self):
+        context = self.get_serializer_context()
+        return FakeSerializer(context=context)
+
+
+class ProductAPIView(BaseAPIView):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency']='INR'
+        return context
+
+
+
+
+view = ProductAPIView()
+serializer = view.get_serializer()
+serializer.show_context()
+
+# -------------->>>>> Django Views <<<<<--------------- #
+
+
+class BaseListAPIView :
+    queryset = []
+    def get_queryset(self):
+        return self.queryset
+
+    def list(self):
+        items = self.get_queryset()
+        for item in items :
+            print(item)
+
+
+
+
+class CourseListAPIView(BaseListAPIView):
+    queryset = ["Python", "Django", "DRF"]
+
+c1 =CourseListAPIView()
+c1.list()
+
+
+
+
+
+
+
+
+
+
+
+
+class BaseListAPIView:
+
+    def __init__(self,user):
+        self.user = user
+
+    def get_queryset(self):
+        return []
+
+    def list(self):
+        items = self.get_queryset()
+        for item in items :
+            print(item.get("title"))
+
+
+
+
+class MyPostAPIView(BaseListAPIView):
+    def get_queryset(self):
+        posts = [
+                {"title": "Python OOP", "owner": "Ali"},
+                {"title": "Django REST", "owner": "Sara"},
+                {"title": "DRF ViewSets", "owner": "Ali"},
+        ]
+        posts = [
+
+         post   for post in posts if post['owner'] == self.user
+        ]
+        return posts
+
+
+view = MyPostAPIView("Ali")
+view.list()
+
+
+
+class APIView:
+    def dispatch(self,method):
+        if method == "GET":
+            return self.get()
+
+        elif method == "POST":
+            return self.post()
+        else:
+            return "Method not allowed."
+
+class CourseAPIView(APIView):
+    def get(self):
+        return "Listing products"
+
+    def post(self):
+        return "Creating product"
+
+
+view = CourseAPIView()
+
+print(view.dispatch("GET"))
+print(view.dispatch("POST"))
+print(view.dispatch("DELETE"))
+
+
+
+
+
+
+class ListAPIView:
+    queryset = []
+
+    def get_queryset(self):
+        return self.queryset
+
+    def list(self):
+        return self.get_queryset()
+
+    def get(self):
+        return self.list()
+class CourseListAPIView(ListAPIView):
+    queryset = ["Python", "Django", "DRF"]
+
+view = CourseListAPIView()
+print(view.get())
+
+
+
+class FakeSerializer:
+
+    def save(self,**kwargs):
+        print("Saving course")
+        print(kwargs)
+
+class CreateAPIView:
+    def post(self,serializer):
+
+        return self.create(serializer)
+
+    def create(self,serializer):
+        print("Validating data")
+        self.perform_create(serializer)
+        return "Created Successfully"
+
+    def perform_create(self,serializer):
+        serializer.save()
+
+
+
+class CourseCreateAPIView(CreateAPIView):
+    def __init__(self,user):
+        self.user=user
+
+    def perform_create(self,serializer):
+        serializer.save(created_by=self.user)
+
+serializer = FakeSerializer()
+
+
+view = CourseCreateAPIView("Sara")
+print(view.post(serializer))
+
+
+
+class BaseAPIListView:
+    queryset =[]
+
+    def get_queryset(self):
+        return self.queryset
+
+    def list(self):
+        return self.get_queryset()
+
+
+
+
+class AgentListApiView(BaseAPIListView):
+    queryset=['ram','arjun']
+
+
+
+
+r1=AgentListApiView()
+print(r1.list())
+
+
+
+
+
+
+
+class RetrieveAPIView:
+    queryset = []
+    def get_queryset(self):
+        return self.queryset
+
+    def get_object(self,object_id):
+        items = self.get_queryset()
+        for item in items:
+            if item['id'] == object_id:
+                return item
+
+        return None
+    def retrieve(self,object_id):
+        return self.get_object(object_id=object_id)
+
+    def get(self,object_id):
+        return self.retrieve(object_id=object_id)
+
+
+class CourseDetailAPIView(RetrieveAPIView):
+    queryset=[
+    {"id": 1, "title": "Python"},
+    {"id": 2, "title": "Django"},
+    {"id": 3, "title": "DRF"},
+]
+
+view = CourseDetailAPIView()
+print(view.get(2))
+print(view.get(5))
+
+
+
+class UpdateAPIView:
+    def __init__(self,user):
+        self.user=user
+
+    def put(self,serializer):
+        return self.update(serializer)
+
+    def update(self,serializer):
+        print("Validating update data")
+        self.perform_update(serializer)
+        return "Update successfully"
+
+    def perform_update(self,serializer):
+        serializer.save()
+
+
+
+
+class FakeSerializer:
+    def save(self,**kwargs):
+        print("Updating course")
+        print(kwargs)
+
+class UpdateAPIView:
+    def put(self,serializer):
+        return self.update(serializer)
+
+    def update(self,serializer):
+        print("Validating update data")
+        self.perform_update(serializer)
+        return "Updated successfully"
+
+
+    def perform_update(self,serializer):
+        serializer.save()
+
+class CourseUpdateAPIView(UpdateAPIView):
+    def __init__(self,user):
+        self.user=user
+
+    def perform_update(self, serializer):
+         serializer.save(updated_by=self.user)
+
+
+serializer = FakeSerializer()
+view = CourseUpdateAPIView("Ali")
+print(view.put(serializer))
 
 
 
