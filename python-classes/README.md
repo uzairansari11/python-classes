@@ -134,3 +134,85 @@ That means I am ready to:
 - continue advanced Python class practice
 - start Django class-based concepts
 - keep improving fluency with repetition
+
+## DRF Learning Progress Snapshot
+
+After finishing the Python class topics, I started learning Django REST Framework class-based concepts.
+
+Current DRF class learning level: around 75% complete.
+
+### DRF Topics Completed
+
+1. `serializer_class`
+2. Dynamic `get_serializer_class()`
+3. `permission_classes`
+4. Multiple permissions
+5. `authentication_classes`
+6. Authentication vs permission
+7. `perform_create()`
+8. `perform_update()`
+9. `get_serializer_context()`
+10. `queryset`
+11. Dynamic `get_queryset()` with current user filtering
+12. `APIView`
+13. `ListAPIView`
+14. `CreateAPIView`
+15. `RetrieveAPIView`
+16. `UpdateAPIView`
+
+### DRF Topics Still Left
+
+1. `DestroyAPIView`
+2. `ListCreateAPIView`
+3. `RetrieveUpdateDestroyAPIView`
+4. `ViewSet`
+5. `ModelViewSet`
+6. DRF mixins:
+   - `ListModelMixin`
+   - `CreateModelMixin`
+   - `RetrieveModelMixin`
+   - `UpdateModelMixin`
+   - `DestroyModelMixin`
+7. Routers
+8. Custom actions with `@action`
+9. Override rules:
+   - `list()` vs `get_queryset()`
+   - `create()` vs `perform_create()`
+   - `update()` vs `perform_update()`
+   - `destroy()` vs `perform_destroy()`
+   - `retrieve()` vs `get_object()`
+
+### Next Topic To Continue From
+
+Continue from:
+
+```text
+DRF DestroyAPIView
+```
+
+The last completed topic was:
+
+```text
+DRF UpdateAPIView
+```
+
+### Important Pattern Learned
+
+Most DRF class concepts follow the same OOP pattern:
+
+```text
+Parent class controls the main flow.
+Child class sets class attributes or overrides small methods.
+DRF calls those methods internally.
+```
+
+Examples:
+
+- `queryset` tells DRF what data to use.
+- `serializer_class` tells DRF which serializer to use.
+- `permission_classes` tells DRF who can access the API.
+- `get_queryset()` is used for dynamic filtering.
+- `get_serializer_class()` is used when serializer changes by action.
+- `get_serializer_context()` sends extra data to the serializer.
+- `perform_create()` customizes saving during create.
+- `perform_update()` customizes saving during update.
